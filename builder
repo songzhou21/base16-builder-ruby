@@ -38,13 +38,23 @@ class Builder < Thor
     end
   end
 
-  desc "build", "Builds all templates for all schemes into ./outputs/"
-
+  desc "build [--scheme scheme] [--template template] [--config config]]", "default Builds all templates for all schemes into ./outputs/"
+  option :scheme
+  option :template
+  option :config
   def build
-    invoke :update unless required_dirs_exist?
+      schemes = []
+      templates = []
+      if options[:scheme] && options[:template] && options[:config]
+          schemes << Scheme.new(file_path: options[:scheme])
+          templates << Template.new(template_dir: nil, config_file: options[:config], template_file: options[:template])
+      else
+        invoke :update unless required_dirs_exist? 
 
-    schemes = Scheme.load_schemes
-    templates = Template.load_templates
+        schemes = Scheme.load_schemes
+        templates = Template.load_templates
+      end
+
 
     Parallel.each(schemes, in_processes: PROCESS_COUNT) do |s|
       templates.each do |t|

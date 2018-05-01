@@ -14,8 +14,9 @@ class Template
     templates
   end
 
-  def initialize(template_dir:, config_file:)
+  def initialize(template_dir:, config_file:, template_file: nil)
     @template_dir = template_dir
+    @template_file = template_file
     @config = YAML.load(File.read(config_file))
 
   end
@@ -24,7 +25,13 @@ class Template
     @config.each do |key, template_file_config|
       template_data = build_template_data(scheme: scheme)
 
-      template_file = "#{@template_dir}/#{key}.mustache"
+      template_file = ""
+      if @template_file
+          template_file = @template_file
+      else
+          template_file = "#{@template_dir}/#{key}.mustache"
+      end
+
       rendered_filename = "base16-#{scheme.slug}#{template_file_config["extension"]}"
       rendered_dir = "out/#{template_file_config["output"]}"
 
